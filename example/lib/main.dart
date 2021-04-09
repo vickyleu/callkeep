@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:callkeep/callkeep.dart';
@@ -26,6 +25,8 @@ bool _callKeepInited = false;
 }
 */
 
+
+///后台处理,程序关闭或者在后台收到推送时调起voip
 Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
   print('backgroundMessage: message => ${message.toString()}');
   var payload = message['data'];
@@ -122,16 +123,6 @@ class _MyAppState extends State<HomePage> {
   final FlutterCallkeep _callKeep = FlutterCallkeep();
   Map<String, Call> calls = {};
   String newUUID() => Uuid().v4();
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-
-  void iOS_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print('Settings registered: $settings');
-    });
-  }
 
   void removeCall(String callUUID) {
     setState(() {
@@ -175,7 +166,6 @@ class _MyAppState extends State<HomePage> {
   Future<void> didReceiveStartCallAction(
       CallKeepDidReceiveStartCallAction event) async {
     if (event.handle == null) {
-      // @TODO: sometime we receive `didReceiveStartCallAction` with handle` undefined`
       return;
     }
     final String callUUID = event.callUUID ?? newUUID();
@@ -310,34 +300,6 @@ class _MyAppState extends State<HomePage> {
         'okButton': 'ok',
       },
     });
-
-    if (Platform.isAndroid) {
-      //if (isIOS) iOS_Permission();
-      //  _firebaseMessaging.requestNotificationPermissions();
-
-      _firebaseMessaging.getToken().then((token) {
-        print('[FCM] token => ' + token);
-      });
-
-      _firebaseMessaging.configure(
-        onMessage: (Map<String, dynamic> message) async {
-          print('onMessage: $message');
-          if (message.containsKey('data')) {
-            // Handle data message
-            final dynamic data = message['data'];
-            var number = data['body'] as String;
-            await displayIncomingCall(number);
-          }
-        },
-        onBackgroundMessage: myBackgroundMessageHandler,
-        onLaunch: (Map<String, dynamic> message) async {
-          print('onLaunch: $message');
-        },
-        onResume: (Map<String, dynamic> message) async {
-          print('onResume: $message');
-        },
-      );
-    }
   }
 
   Widget buildCallingWidgets() {

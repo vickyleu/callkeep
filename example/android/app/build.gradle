@@ -22,11 +22,9 @@ if (flutterVersionName == null) {
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 dependencies {
-  implementation 'com.google.firebase:firebase-messaging:20.3.0'
 }
 
 android {
@@ -35,9 +33,13 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
-
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java','src/main/kotlin']
+        }
+    }
     defaultConfig {
-        applicationId "com.github.cloudwebrtc.flutter_callkeep_example"
+        applicationId "com.bond.placeholder"
         minSdkVersion 23
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
